@@ -1,6 +1,8 @@
 using CalculatorApp.Components;
 using CalculatorApp.Data;
 using Microsoft.EntityFrameworkCore;
+using CalculatorApp.Validation;
+using CalculatorApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
     options.UseSqlite(connectionString);
 });
+builder.Services.AddScoped<AuthInputValidator>();
+builder.Services.AddScoped<CalculatorInputValidator>();
+builder.Services.AddScoped<SessionStateService>();
 
 var app = builder.Build();
 
