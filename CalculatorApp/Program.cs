@@ -1,10 +1,20 @@
 using CalculatorApp.Components;
+using CalculatorApp.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Database connection string was not found.");
+
+    options.UseSqlite(connectionString);
+});
 
 var app = builder.Build();
 
