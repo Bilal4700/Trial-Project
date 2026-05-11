@@ -1,5 +1,5 @@
 create-migration;:
 	dotnet ef migrations add InitialCreate
 
-update database;:
+update-database;:
 	dotnet ef database update
