@@ -1,8 +1,10 @@
+using Microsoft.EntityFrameworkCore;
 using CalculatorApp.Components;
 using CalculatorApp.Data;
-using Microsoft.EntityFrameworkCore;
 using CalculatorApp.Validation;
 using CalculatorApp.Services;
+using CalculatorApp.Models;
+using CalculatorApp.Results;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +22,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<AuthInputValidator>();
 builder.Services.AddScoped<CalculatorInputValidator>();
 builder.Services.AddScoped<SessionStateService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CalculatorService>();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
