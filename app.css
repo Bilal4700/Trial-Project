@@ -1,0 +1,491 @@
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+    --raptor-navy:    #0f1724;
+    --raptor-navy-2:  #1a2640;
+    --raptor-navy-3:  #243352;
+    --raptor-accent:  #e8a020;   /* amber from existing Raptor UIs */
+    --raptor-accent-h:#f5b83d;
+    --raptor-danger:  #d04f3a;
+    --raptor-danger-bg: rgba(208, 79, 58, 0.12);
+    --raptor-success: #3b8b5a;
+
+    --text-primary:   #e8e6de;
+    --text-secondary: #9a9890;
+    --text-muted:     #6b6966;
+
+    --border:         rgba(255, 255, 255, 0.08);
+    --border-focus:   rgba(232, 160, 32, 0.5);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    --font: "Segoe UI", system-ui, sans-serif;
+    --font-mono: "Cascadia Code", "Consolas", monospace;
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+    font-family: var(--font);
+    background: var(--raptor-navy);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Login page ─────────────────────────────────────────────── */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: radial-gradient(ellipse at 60% 30%, #1c2e52 0%, var(--raptor-navy) 70%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--raptor-navy-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--raptor-accent);
+    color: var(--raptor-navy);
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.login-header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* ── Form elements ──────────────────────────────────────────── */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background: var(--raptor-navy-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 0.9375rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus {
+    border-color: var(--raptor-accent);
+    box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+input.input-error {
+    border-color: var(--raptor-danger);
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 4.5rem;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    padding: 0.25rem 0.25rem;
+}
+
+.toggle-password:hover { color: var(--text-primary); }
+
+/* ── Validation messages ────────────────────────────────────── */
+.field-error {
+    display: block;
+    font-size: 0.8rem;
+    color: #e07060;
+    margin-top: 0.3rem;
+}
+
+.validation-message { /* Blazor default class */
+    font-size: 0.8rem;
+    color: #e07060;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+/* ── Alerts ─────────────────────────────────────────────────── */
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background: var(--raptor-danger-bg);
+    border: 1px solid rgba(208, 79, 58, 0.35);
+    color: #e87060;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--raptor-accent);
+    color: var(--raptor-navy);
+    font-family: var(--font);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.btn-primary:hover:not(:disabled) { background: var(--raptor-accent-h); }
+.btn-primary:active:not(:disabled) { transform: scale(0.985); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: var(--font);
+    font-size: 0.8125rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-ghost:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+
+/* ── Spinner ─────────────────────────────────────────────────── */
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0,0,0,0.25);
+    border-top-color: var(--raptor-navy);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Page wrapper (calculator page) ─────────────────────────── */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.page-header {
+    background: var(--raptor-navy-2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0.875rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+}
+
+.logo-mark-sm {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--raptor-accent);
+    color: var(--raptor-navy);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.nav-link {
+    text-decoration: none;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    transition: color 0.15s;
+}
+
+.nav-link.active, .nav-link:hover { color: var(--text-primary); }
+
+.btn-logout {
+    background: none;
+    border: none;
+    font-family: var(--font);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.15s;
+    padding: 0;
+}
+
+.btn-logout:hover { color: #e07060; }
+
+/* ── Calculator main ─────────────────────────────────────────── */
+.calculator-main {
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 640px) {
+    .calculator-main { grid-template-columns: 1fr; }
+}
+
+/* ── Calculator card ─────────────────────────────────────────── */
+.calc-card,
+.history-card {
+    background: var(--raptor-navy-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.5rem;
+}
+
+.calc-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (max-width: 480px) {
+    .input-row { grid-template-columns: 1fr; }
+}
+
+/* ── Operation buttons ────────────────────────────────────────── */
+.op-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.btn-op {
+    flex: 1;
+    padding: 0.875rem 0.5rem;
+    background: var(--raptor-navy-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-family: var(--font);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.btn-op:hover {
+    border-color: rgba(255,255,255,0.2);
+    color: var(--text-primary);
+}
+
+.btn-op.active {
+    border-color: var(--raptor-accent);
+    color: var(--raptor-accent);
+    background: rgba(232, 160, 32, 0.08);
+}
+
+.op-symbol {
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.op-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ── Calculate button ─────────────────────────────────────────── */
+.btn-calculate {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--raptor-accent);
+    color: var(--raptor-navy);
+    font-family: var(--font);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 1.25rem;
+}
+
+.btn-calculate:hover:not(:disabled) { background: var(--raptor-accent-h); }
+.btn-calculate:active:not(:disabled) { transform: scale(0.985); }
+.btn-calculate:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Result panel ─────────────────────────────────────────────── */
+.result-panel {
+    background: var(--raptor-navy-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    animation: fadeIn 0.2s ease;
+}
+
+.result-expression {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.result-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--raptor-accent);
+    font-family: var(--font-mono);
+    margin-top: 0.2rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── History card ─────────────────────────────────────────────── */
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.history-header h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.empty-state {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.history-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.history-entry {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+}
+
+.history-entry:last-child { border-bottom: none; }
+
+.history-expr { color: var(--text-secondary); font-family: var(--font-mono); }
+.history-eq   { color: var(--text-muted); }
+.history-result { color: var(--raptor-accent); font-family: var(--font-mono); font-weight: 600; }
+.history-time { color: var(--text-muted); font-size: 0.75rem; }
