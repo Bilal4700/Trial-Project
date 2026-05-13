@@ -1,0 +1,252 @@
+@page "/calculator"
+@attribute [Authorize]
+@inject ICalculatorService CalculatorService
+@inject ILogger<Calculator> Logger
+@inject NavigationManager Navigation
+
+<PageTitle>Calculator — Raptor Integration</PageTitle>
+
+<div class="page-wrapper">
+    <header class="page-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="logo-mark-sm">R</span>
+                <span class="brand-name">Raptor Integration</span>
+            </div>
+            <nav class="header-nav">
+                <a class="nav-link active" href="/calculator">Calculator</a>
+                <button class="btn-logout" @onclick="HandleLogout">Sign out</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="calculator-main">
+        <div class="calc-card">
+            <h2 class="calc-title">Calculator</h2>
+
+            <div class="input-row">
+                <div class="form-group">
+                    <label for="operand-a">First number</label>
+                    <input id="operand-a"
+                           type="number"
+                           step="any"
+                           @bind="_inputA"
+                           @bind:event="oninput"
+                           @oninput="ClearResult"
+                           class="@(HasInputError("A") ? "input-error" : "")"
+                           placeholder="0"
+                           aria-describedby="@(HasInputError("A") ? "err-a" : null)" />
+                    @if (HasInputError("A"))
+                    {
+                        <span id="err-a" class="field-error">@_inputErrors["A"]</span>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="operand-b">Second number</label>
+                    <input id="operand-b"
+                           type="number"
+                           step="any"
+                           @bind="_inputB"
+                           @bind:event="oninput"
+                           @oninput="ClearResult"
+                           class="@(HasInputError("B") ? "input-error" : "")"
+                           placeholder="0"
+                           aria-describedby="@(HasInputError("B") ? "err-b" : null)" />
+                    @if (HasInputError("B"))
+                    {
+                        <span id="err-b" class="field-error">@_inputErrors["B"]</span>
+                    }
+                </div>
+            </div>
+
+            <div class="op-buttons" role="group" aria-label="Operation">
+                <button class="btn-op @(_selectedOp == "add" ? "active" : "")"
+                        @onclick='() => SelectOperation("add")'>
+                    <span class="op-symbol">+</span>
+                    <span class="op-label">Add</span>
+                </button>
+                <button class="btn-op @(_selectedOp == "multiply" ? "active" : "")"
+                        @onclick='() => SelectOperation("multiply")'>
+                    <span class="op-symbol">×</span>
+                    <span class="op-label">Multiply</span>
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_globalError))
+            {
+                <div class="alert alert-error" role="alert">@_globalError</div>
+            }
+
+            <button class="btn-calculate" @onclick="Calculate" disabled="@(_isCalculating || string.IsNullOrEmpty(_selectedOp))">
+                @if (_isCalculating)
+                {
+                    <span class="spinner" aria-hidden="true"></span>
+                    <span>Calculating…</span>
+                }
+                else
+                {
+                    <span>Calculate</span>
+                }
+            </button>
+
+            @if (_result.HasValue)
+            {
+                <div class="result-panel" role="status" aria-live="polite">
+                    <div class="result-expression">
+                        @_lastExpression
+                    </div>
+                    <div class="result-value">
+                        = @_result.Value.ToString("G")
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="history-card">
+            <div class="history-header">
+                <h3>History</h3>
+                @if (_history.Any())
+                {
+                    <button class="btn-ghost" @onclick="ClearHistory">Clear</button>
+                }
+            </div>
+
+            @if (!_history.Any())
+            {
+                <p class="empty-state">No calculations yet.</p>
+            }
+            else
+            {
+                <ol class="history-list" reversed>
+                    @foreach (var entry in _history.AsEnumerable().Reverse())
+                    {
+                        <li class="history-entry">
+                            <span class="history-expr">@entry.Expression</span>
+                            <span class="history-eq">=</span>
+                            <span class="history-result">@entry.Result.ToString("G")</span>
+                            <span class="history-time">@entry.Timestamp.ToString("HH:mm:ss")</span>
+                        </li>
+                    }
+                </ol>
+            }
+        </div>
+    </main>
+</div>
+
+@code {
+    // --- State ---
+    private string _inputA = string.Empty;
+    private string _inputB = string.Empty;
+    private string _selectedOp = string.Empty;
+    private bool _isCalculating;
+    private double? _result;
+    private string _lastExpression = string.Empty;
+    private string _globalError = string.Empty;
+    private Dictionary<string, string> _inputErrors = new();
+    private List<CalculationEntry> _history = new();
+
+    private bool HasInputError(string key) => _inputErrors.ContainsKey(key);
+
+    private void SelectOperation(string op)
+    {
+        _selectedOp = op;
+        ClearResult();
+    }
+
+    private void ClearResult()
+    {
+        _result = null;
+        _globalError = string.Empty;
+        _inputErrors.Clear();
+    }
+
+    private void ClearHistory() => _history.Clear();
+
+    private async Task Calculate()
+    {
+        ClearResult();
+        _inputErrors.Clear();
+
+        // --- Input washing (requirement from Technical Interview doc) ---
+        if (!TryParseInput(_inputA, "A", "First number", out double a)) return;
+        if (!TryParseInput(_inputB, "B", "Second number", out double b)) return;
+
+        if (string.IsNullOrEmpty(_selectedOp))
+        {
+            _globalError = "Please select an operation.";
+            return;
+        }
+
+        _isCalculating = true;
+        try
+        {
+            var calcResult = await CalculatorService.CalculateAsync(_selectedOp, a, b);
+
+            if (calcResult.Success)
+            {
+                _result = calcResult.Value;
+                string symbol = _selectedOp == "add" ? "+" : "×";
+                _lastExpression = $"{a} {symbol} {b}";
+                _history.Add(new CalculationEntry(_lastExpression, calcResult.Value, DateTime.Now));
+                Logger.LogInformation("Calculation: {Expression} = {Result}", _lastExpression, calcResult.Value);
+            }
+            else
+            {
+                _globalError = calcResult.ErrorMessage ?? "Calculation failed.";
+                Logger.LogWarning("Calculation failed: {Op}({A}, {B}) — {Error}", _selectedOp, a, b, _globalError);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error during calculation: {Op}({A}, {B})", _selectedOp, a, b);
+            _globalError = "An unexpected error occurred.";
+        }
+        finally
+        {
+            _isCalculating = false;
+        }
+    }
+
+    /// <summary>
+    /// Washes and validates a user-supplied number string.
+    /// Returns false and populates _inputErrors if invalid.
+    /// </summary>
+    private bool TryParseInput(string raw, string key, string label, out double value)
+    {
+        value = 0;
+        var trimmed = raw?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            _inputErrors[key] = $"{label} is required.";
+            return false;
+        }
+
+        if (!double.TryParse(trimmed, System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out value))
+        {
+            _inputErrors[key] = $"{label} must be a valid number.";
+            return false;
+        }
+
+        if (double.IsNaN(value) || double.IsInfinity(value))
+        {
+            _inputErrors[key] = $"{label} must be a finite number.";
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task HandleLogout()
+    {
+        // Delegate to auth service; navigation happens after state is cleared
+        // so the browser does not briefly flash a protected page
+        await Task.CompletedTask;
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    // --- Local record type for history entries ---
+    private record CalculationEntry(string Expression, double Result, DateTime Timestamp);
+}
