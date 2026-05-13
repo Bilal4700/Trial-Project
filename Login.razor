@@ -1,0 +1,114 @@
+@page "/login"
+@page "/"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ILogger<Login> Logger
+
+<PageTitle>Login — Raptor Integration</PageTitle>
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo-mark">R</div>
+            <h1>Raptor Integration</h1>
+            <p class="subtitle">Sign in to continue</p>
+        </div>
+
+        <EditForm Model="@_model" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <InputText id="username"
+                           @bind-Value="_model.Username"
+                           class="@(_fieldErrors.ContainsKey("Username") ? "input-error" : "")"
+                           placeholder="Enter your username"
+                           autocomplete="username" />
+                <ValidationMessage For="@(() => _model.Username)" class="field-error" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <InputText id="password"
+                               type="@(_showPassword ? "text" : "password")"
+                               @bind-Value="_model.Password"
+                               class="@(_fieldErrors.ContainsKey("Password") ? "input-error" : "")"
+                               placeholder="Enter your password"
+                               autocomplete="current-password" />
+                    <button type="button" class="toggle-password" @onclick="() => _showPassword = !_showPassword"
+                            aria-label="@(_showPassword ? "Hide password" : "Show password")">
+                        @(_showPassword ? "Hide" : "Show")
+                    </button>
+                </div>
+                <ValidationMessage For="@(() => _model.Password)" class="field-error" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-error" role="alert">
+                    @_errorMessage
+                </div>
+            }
+
+            <button type="submit" class="btn-primary" disabled="@_isLoading">
+                @if (_isLoading)
+                {
+                    <span class="spinner" aria-hidden="true"></span>
+                    <span>Signing in…</span>
+                }
+                else
+                {
+                    <span>Sign in</span>
+                }
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel _model = new();
+    private bool _isLoading;
+    private bool _showPassword;
+    private string _errorMessage = string.Empty;
+    private Dictionary<string, string> _fieldErrors = new();
+
+    protected override void OnInitialized()
+    {
+        // If already authenticated, redirect to calculator
+        if (AuthService.IsAuthenticated)
+            Navigation.NavigateTo("/calculator");
+    }
+
+    private async Task HandleLogin()
+    {
+        _isLoading = true;
+        _errorMessage = string.Empty;
+        _fieldErrors.Clear();
+
+        try
+        {
+            var result = await AuthService.LoginAsync(_model.Username, _model.Password);
+
+            if (result.Success)
+            {
+                Logger.LogInformation("Successful login for user: {Username}", _model.Username);
+                Navigation.NavigateTo("/calculator");
+            }
+            else
+            {
+                _errorMessage = result.ErrorMessage ?? "Invalid username or password.";
+                Logger.LogWarning("Failed login attempt for user: {Username}", _model.Username);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error during login for user: {Username}", _model.Username);
+            _errorMessage = "An unexpected error occurred. Please try again.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
