@@ -1,0 +1,16 @@
+@* RedirectToLogin.razor
+   Placed inside <NotAuthorized> in App.razor.
+   Sends the browser to /login when a protected page is reached unauthenticated.
+   Using NavigationManager instead of a plain <a> avoids a full-page reload
+   on Blazor Server, which preserves the SignalR connection. *@
+
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Preserve the originally requested URL so we can redirect back after login
+        // if that feature is added later (store it in a service or query-string).
+        Navigation.NavigateTo("/login", replace: true);
+    }
+}
