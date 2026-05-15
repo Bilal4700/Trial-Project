@@ -1,0 +1,23 @@
+# Build output
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Local IDE settings
+.vs/
+.vscode/
+*.user
+*.suo
+*.rsuser
+
+# Local .NET tooling/cache files
+*.lscache
+
+# SQLite runtime sidecar files
+*.db-shm
+*.db-wal
+
+# OS files
+Thumbs.db
+.DS_Store

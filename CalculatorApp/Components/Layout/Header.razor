@@ -1,0 +1,54 @@
+@implements IDisposable
+@inject AuthService AuthService
+@inject SessionStateService SessionState
+@inject NavigationManager Navigation
+
+<header class="raptor-header">
+    <div class="raptor-brand">
+        <span class="raptor-menu-icon" aria-hidden="true">=</span>
+        <a class="raptor-logo" href="">Raptor</a>
+    </div>
+
+    <nav class="raptor-nav" aria-label="Primary navigation">
+        <NavLink class="raptor-nav-link" href="" Match="NavLinkMatch.All">Home</NavLink>
+        <NavLink class="raptor-nav-link" href="login">Login</NavLink>
+        <NavLink class="raptor-nav-link" href="calculator">Calculator</NavLink>
+    </nav>
+
+    <div class="raptor-user">
+        @if (SessionState.IsLoggedIn)
+        {
+            <span>Hello @SessionState.Username</span>
+            <button type="button" class="raptor-icon-button" @onclick="Logout" title="Sign out">
+                Sign out
+            </button>
+        }
+        else
+        {
+            <span>Not signed in</span>
+        }
+    </div>
+</header>
+
+@code {
+    protected override void OnInitialized()
+    {
+        SessionState.OnChange += HandleSessionChanged;
+    }
+
+    private void Logout()
+    {
+        AuthService.Logout();
+        Navigation.NavigateTo("/login");
+    }
+
+    private void HandleSessionChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        SessionState.OnChange -= HandleSessionChanged;
+    }
+}

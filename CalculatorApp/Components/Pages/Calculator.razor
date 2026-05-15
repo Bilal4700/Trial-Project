@@ -1,0 +1,165 @@
+@page "/calculator"
+@inject CalculatorService CalculatorService
+@inject SessionStateService SessionState
+@inject NavigationManager Navigation
+@inject ILogger<Calculator> Logger
+
+<PageTitle>Calculator - Raptor Trial</PageTitle>
+
+<section class="tool-screen">
+    <div class="tool-panel">
+        <div class="section-kicker">Backend Connected</div>
+        <h1>Calculator</h1>
+        <p class="muted-text">
+            Add or multiply two numbers. The backend validates input and saves each successful calculation.
+        </p>
+
+        <div class="calculator-grid">
+            <div class="field-stack">
+                <label for="first-number">First number</label>
+                <input id="first-number" class="raptor-input" @bind="_firstInput" @bind:event="oninput" />
+            </div>
+
+            <div class="field-stack">
+                <label for="second-number">Second number</label>
+                <input id="second-number" class="raptor-input" @bind="_secondInput" @bind:event="oninput" />
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_message))
+        {
+            <div class="@_messageClass" role="status">@_message</div>
+        }
+
+        <div class="action-row">
+            <button class="raptor-primary-button" type="button" @onclick="AddAsync" disabled="@_isBusy">Add</button>
+            <button class="raptor-primary-button" type="button" @onclick="MultiplyAsync" disabled="@_isBusy">Multiply</button>
+        </div>
+
+        @if (_result is not null)
+        {
+            <div class="result-strip">
+                <span>@_expression</span>
+                <strong>@_result</strong>
+            </div>
+        }
+    </div>
+
+    <div class="tool-panel">
+        <div class="panel-heading">
+            <div>
+                <div class="section-kicker">Database Log</div>
+                <h2>Recent calculations</h2>
+            </div>
+            <button class="raptor-secondary-button compact" type="button" @onclick="LoadHistoryAsync">Refresh</button>
+        </div>
+
+        @if (_history.Count == 0)
+        {
+            <p class="muted-text">No calculations have been saved yet.</p>
+        }
+        else
+        {
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Operation</th>
+                        <th>Input</th>
+                        <th>Result</th>
+                        <th>UTC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in _history)
+                    {
+                        <tr>
+                            <td>@item.Operation</td>
+                            <td>@item.FirstNumber, @item.SecondNumber</td>
+                            <td>@item.Result</td>
+                            <td>@item.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</section>
+
+@code {
+    private string? _firstInput;
+    private string? _secondInput;
+    private string? _message;
+    private string _messageClass = "raptor-alert";
+    private string? _expression;
+    private decimal? _result;
+    private bool _isBusy;
+    private List<CalculationLog> _history = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!SessionState.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        await LoadHistoryAsync();
+    }
+
+    private async Task AddAsync()
+    {
+        await CalculateAsync("Add");
+    }
+
+    private async Task MultiplyAsync()
+    {
+        await CalculateAsync("Multiply");
+    }
+
+    private async Task CalculateAsync(string operation)
+    {
+        _isBusy = true;
+        _message = string.Empty;
+        _result = null;
+
+        try
+        {
+            var result = operation == "Add"
+                ? await CalculatorService.AddAsync(_firstInput, _secondInput)
+                : await CalculatorService.MultiplyAsync(_firstInput, _secondInput);
+
+            if (!result.IsSuccess)
+            {
+                _messageClass = "raptor-alert raptor-alert-error";
+                _message = result.Message;
+                return;
+            }
+
+            _result = result.Result;
+            _expression = $"{_firstInput?.Trim()} {OperationSymbol(operation)} {_secondInput?.Trim()}";
+            _messageClass = "raptor-alert raptor-alert-success";
+            _message = result.Message;
+            await LoadHistoryAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Frontend calculator call failed for operation {Operation}.", operation);
+            _messageClass = "raptor-alert raptor-alert-error";
+            _message = "The calculator could not complete the request.";
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task LoadHistoryAsync()
+    {
+        _history = await CalculatorService.GetCalculationHistoryAsync();
+    }
+
+    private static string OperationSymbol(string operation)
+    {
+        return operation == "Add" ? "+" : "x";
+    }
+}
