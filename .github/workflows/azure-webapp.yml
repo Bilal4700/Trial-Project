@@ -1,0 +1,36 @@
+name: Azure Web App Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore CalculatorApp/CalculatorApp.csproj
+
+      - name: Build
+        run: dotnet build CalculatorApp/CalculatorApp.csproj --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish CalculatorApp/CalculatorApp.csproj --configuration Release --output CalculatorApp/publish --no-build
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: CalculatorApp/publish
