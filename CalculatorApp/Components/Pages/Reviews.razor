@@ -1,0 +1,131 @@
+@page "/reviews"
+@using System.ComponentModel.DataAnnotations
+@inject ReviewService ReviewService
+
+<PageTitle>Reviews - Raptor Trial</PageTitle>
+
+<section class="reviews-screen">
+    <div class="reviews-layout">
+        <div class="tool-panel review-form-panel">
+            <div class="section-kicker">Share your experience</div>
+            <h1>Add a review</h1>
+            <p class="muted-text">Tell us what you think about the app.</p>
+
+            <EditForm Model="_review" OnValidSubmit="SubmitReviewAsync" FormName="review-form">
+                <DataAnnotationsValidator />
+
+                <div class="field-stack">
+                    <label for="review-name">Your name</label>
+                    <InputText id="review-name" class="raptor-input" @bind-Value="_review.Name" maxlength="50" />
+                    <ValidationMessage For="() => _review.Name" />
+                </div>
+
+                <div class="field-stack">
+                    <label for="review-comment">Your review</label>
+                    <InputTextArea id="review-comment" class="raptor-input review-textarea" @bind-Value="_review.Comment" maxlength="1000" />
+                    <ValidationMessage For="() => _review.Comment" />
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_message))
+                {
+                    <div class="@_messageClass" role="status">@_message</div>
+                }
+
+                <button class="raptor-primary-button" type="submit" disabled="@_isSubmitting">
+                    @( _isSubmitting ? "Adding..." : "Add review" )
+                </button>
+            </EditForm>
+        </div>
+
+        <div class="tool-panel">
+            <div class="panel-heading">
+                <div>
+                    <div class="section-kicker">Community feedback</div>
+                    <h2>User reviews</h2>
+                </div>
+                <button class="raptor-secondary-button compact" type="button" @onclick="LoadReviewsAsync">Refresh</button>
+            </div>
+
+            @if (_isLoading)
+            {
+                <p class="muted-text">Loading reviews...</p>
+            }
+            else if (_reviews.Count == 0)
+            {
+                <p class="muted-text">No reviews have been added yet.</p>
+            }
+            else
+            {
+                <div class="review-list">
+                    @foreach (var review in _reviews)
+                    {
+                        <article class="review-card">
+                            <div class="review-card-header">
+                                <strong>@review.Name</strong>
+                                <time datetime="@review.CreatedAtUtc.ToString("o")">
+                                    @review.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")
+                                </time>
+                            </div>
+                            <p>@review.Comment</p>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private ReviewFormModel _review = new();
+    private List<Review> _reviews = new();
+    private bool _isLoading = true;
+    private bool _isSubmitting;
+    private string? _message;
+    private string _messageClass = "raptor-alert";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReviewsAsync();
+    }
+
+    private async Task LoadReviewsAsync()
+    {
+        _isLoading = true;
+        _reviews = await ReviewService.GetReviewsAsync();
+        _isLoading = false;
+    }
+
+    private async Task SubmitReviewAsync()
+    {
+        _isSubmitting = true;
+        _message = null;
+
+        var result = await ReviewService.AddReviewAsync(_review.Name, _review.Comment);
+
+        if (result.IsSuccess)
+        {
+            _messageClass = "raptor-alert raptor-alert-success";
+            _message = result.Message;
+            _review = new ReviewFormModel();
+            await LoadReviewsAsync();
+        }
+        else
+        {
+            _messageClass = "raptor-alert raptor-alert-error";
+            _message = result.Message;
+        }
+
+        _isSubmitting = false;
+    }
+
+    private sealed class ReviewFormModel
+    {
+        [Required]
+        [StringLength(50)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(1000)]
+        public string Comment { get; set; } = string.Empty;
+    }
+}

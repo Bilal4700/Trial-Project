@@ -259,14 +259,71 @@ h2 {
     border-color: rgba(39, 131, 92, 0.55);
 }
 
+.tool-screen,
+.reviews-screen {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+}
+
 .tool-screen {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     gap: 1rem;
 }
 
+.reviews-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.75fr) minmax(0, 1.25fr);
+    gap: 1rem;
+}
+
 .tool-panel {
     padding: 1.5rem;
+}
+
+.review-form-panel h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.review-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.review-list {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.review-card {
+    padding: 1rem;
+    border: 1px solid var(--raptor-line);
+    border-radius: 5px;
+    background: #111a27;
+}
+
+.review-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.55rem;
+}
+
+.review-card-header strong {
+    color: #f4f7fb;
+}
+
+.review-card time {
+    color: var(--raptor-muted);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.review-card p {
+    margin: 0;
+    color: #c6cfda;
+    white-space: pre-wrap;
 }
 
 .calculator-grid {

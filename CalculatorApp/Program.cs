@@ -29,6 +29,7 @@ builder.Services.AddScoped<CalculatorInputValidator>();
 builder.Services.AddScoped<SessionStateService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CalculatorService>();
+builder.Services.AddScoped<ReviewService>();
 
 var app = builder.Build();
 
@@ -57,3 +58,4 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+

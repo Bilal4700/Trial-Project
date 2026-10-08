@@ -16,6 +16,8 @@ public class AppDbContext : DbContext
 
     public DbSet<CalculationLog> CalculationLogs => Set<CalculationLog>();
 
+    public DbSet<Review> Reviews => Set<Review>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -72,6 +74,22 @@ public class AppDbContext : DbContext
                 .HasPrecision(18, 4);
 
             entity.Property(log => log.CreatedAtUtc)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.HasKey(review => review.Id);
+
+            entity.Property(review => review.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(review => review.Comment)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            entity.Property(review => review.CreatedAtUtc)
                 .IsRequired();
         });
     }
